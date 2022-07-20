@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "sdMUpomIR4IFfBoeIU+/J3r8wPm5kK4Nl1LOwwAZkM+3PdIiFo64Kgnqz1YBs70Nj3mOYUU4llJsrGQ6kbAybA==",
+  "success": true,
+  "projectFilePath": "C:\\KTIProjects\\KTIRobot\\KTIRobot.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\archer.KTI-AUSTIN\\.nuget\\packages\\robodkapi\\4.2.3\\robodkapi.4.2.3.nupkg.sha512"
+  ],
+  "logs": []
+}

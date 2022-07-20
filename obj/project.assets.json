@@ -1,0 +1,140 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.7.2": {
+      "RoboDkApi/4.2.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win": {
+      "RoboDkApi/4.2.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x64": {
+      "RoboDkApi/4.2.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x86": {
+      "RoboDkApi/4.2.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net45/RoboDkApi.dll": {},
+          "lib/net45/System.ValueTuple.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "RoboDkApi/4.2.3": {
+      "sha512": "9zQykP/5QgwqGfeVvbmlr56Sj3SQ2Ztn9OmNoiHRbNGrfXER044w/HObQ+D7Ing0wUQ28dvkSxEGhfnM/8i4Nw==",
+      "type": "package",
+      "path": "robodkapi/4.2.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "RoboDK-API-Documentation.url",
+        "RoboDK.ico",
+        "RoboDK.png",
+        "lib/net45/RoboDkApi.dll",
+        "lib/net45/RoboDkApi.pdb",
+        "lib/net45/System.ValueTuple.dll",
+        "lib/net45/System.ValueTuple.xml",
+        "license.txt",
+        "robodkapi.4.2.3.nupkg.sha512",
+        "robodkapi.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.7.2": [
+      "RoboDkApi >= 4.2.3"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\archer.KTI-AUSTIN\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\KTIProjects\\KTIRobot\\KTIRobot.csproj",
+      "projectName": "KTIRobot",
+      "projectPath": "C:\\KTIProjects\\KTIRobot\\KTIRobot.csproj",
+      "packagesPath": "C:\\Users\\archer.KTI-AUSTIN\\.nuget\\packages\\",
+      "outputPath": "C:\\KTIProjects\\KTIRobot\\obj\\",
+      "projectStyle": "PackageReference",
+      "skipContentFileWrite": true,
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\archer.KTI-AUSTIN\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net472"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net472": {
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "net472": {
+        "dependencies": {
+          "RoboDkApi": {
+            "target": "Package",
+            "version": "[4.2.3, )"
+          }
+        }
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}

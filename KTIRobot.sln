@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KTIRobot", "KTIRobot.csproj", "{401CF2B1-84CD-4749-8459-7169C29AECF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleNetFrameworkApplication", "..\RoboDK-API-master\C#\APIExamples\SimpleApplication\SimpleNetFrameworkApplication.csproj", "{8E554F79-CC49-4E18-87F2-9703E82E5584}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoboDKApiWinformsApplication", "..\RoboDK-API-master\C#\APIExamples\UIExample\RoboDKApiWinformsApplication.csproj", "{F96E10E6-BFF1-4E5A-84C5-B19DB809F759}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E554F79-CC49-4E18-87F2-9703E82E5584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E554F79-CC49-4E18-87F2-9703E82E5584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E554F79-CC49-4E18-87F2-9703E82E5584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E554F79-CC49-4E18-87F2-9703E82E5584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F96E10E6-BFF1-4E5A-84C5-B19DB809F759}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F96E10E6-BFF1-4E5A-84C5-B19DB809F759}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F96E10E6-BFF1-4E5A-84C5-B19DB809F759}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F96E10E6-BFF1-4E5A-84C5-B19DB809F759}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0670BCCE-D62C-4C3A-A452-26C0A3134B4B}
+	EndGlobalSection
+EndGlobal
