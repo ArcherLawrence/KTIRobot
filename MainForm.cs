@@ -74,7 +74,23 @@ namespace KTIRobot
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+        }
+
+        private void ExitBtn_Click(object sender, EventArgs e)
+        {
             CloseAllStations();
+            Application.Exit();
+        }
+
+        private void GripClose_Click(object sender, EventArgs e)
+        {
+            GripCloseRdk();
+        }
+
+
+        private void GripOpen_Click(object sender, EventArgs e)
+        {
+            GripOpenRdk();
         }
     }
 }
