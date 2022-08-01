@@ -5,6 +5,8 @@ VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KTIRobot", "KTIRobot.csproj", "{401CF2B1-84CD-4749-8459-7169C29AECF2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoboDkApi", "..\RoboDK-API-master\C#\API\RoboDkApi.csproj", "{CEDEAA10-8B1B-4000-950C-764FFFAED977}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{401CF2B1-84CD-4749-8459-7169C29AECF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEDEAA10-8B1B-4000-950C-764FFFAED977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEDEAA10-8B1B-4000-950C-764FFFAED977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEDEAA10-8B1B-4000-950C-764FFFAED977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEDEAA10-8B1B-4000-950C-764FFFAED977}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

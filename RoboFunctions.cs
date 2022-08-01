@@ -46,116 +46,300 @@ namespace KTIRobot
         }
         void GripOpenRdk()
         {
+            double[] joints = _Robot.Joints();
+
             _Robot.setDO("15", "0");
-            _Robot.Pause(30);
-            _Robot.setDO("14", "1");
-            _Robot.Pause(30);
-            _Robot.setDO("10", "0");
-            _Robot.Pause(30);
-            _Robot.setDO("11", "0");
+            _Robot.MoveJ(joints);
+            _Robot.Pause(50);
+
+
+            _Robot.setDO("14", "0");
+            _Robot.MoveJ(joints);
+            _Robot.Pause(50);
+
+            _Robot.setDO("14", "1");   // close
+            _Robot.MoveJ(joints);
+            _Robot.Pause(50);
+            return;
         }
-        bool GripCloseRdk(int retry =1)
+        bool GripCloseRdk(int retry = 1)
         {
-            /* Double Pulse
-            _Robot.setDO("14", "0");
-            _Robot.Pause(30);
-            _Robot.setDO("15", "1");
-            _Robot.Pause(250);
+            double []joints = _Robot.Joints();
+                
             _Robot.setDO("15", "0");
-            _Robot.Pause(30);
-            _Robot.setDO("14", "1");
-            _Robot.Pause(100);
-            */
+            _Robot.MoveJ(joints);
+            _Robot.Pause(50);
+
             _Robot.setDO("14", "0");
-            _Robot.Pause(30);
-            _Robot.setDO("15", "1");
-            _Robot.Pause(250);
-            string closeSensor = _Robot.SetParam("Driver", "GET $IN[12]");
-            string openSensor = _Robot.SetParam("Driver", "GET $IN[13]");
-            if (closeSensor.Equals("1"))
-            {
-                if (retry == 1) // First attempt failed, retry once
-                    GripCloseRdk(0);
-                else
-                {
-                    //Grip failed, set LED to red and return false
-                    _Robot.setDO("11", "1");
-                    _Robot.Pause(30);
-                    _Robot.setDO("10", "1");
-                    return false;
-                }
-            }
-            else
-            {
-                if (openSensor.Equals("1"))
-                {
-                    //This case should not be possible, but if we end up here, set LED to yellow and return false
-                    _Robot.setDO("10", "1");
-                    _Robot.Pause(30);
-                    _Robot.setDO("11", "0");
-                    return false;
-                }
-                else
-                {
-                    _Robot.setDO("10", "0");
-                    _Robot.Pause(30);
-                    _Robot.setDO("11", "1");
-                    return true;
-                }
-            }
-            return false;
+            _Robot.MoveJ(joints);
+            _Robot.Pause(50);
+
+            _Robot.setDO("15", "1");   // close
+            _Robot.MoveJ(joints);
+            _Robot.Pause(50);
+
+            return true;
+
         }
-        int PickInput(int input = 1)
+        int PickTray(int target, int input = 1)
         {
             if (input > 50)
                 return -1; //input exceeds maximum tray size, return -1 so we know tray is empty
+
+            // open gripped
             GripOpenRdk();
+
             //Full implementation of point arrays needed, using initially grabbed values for now.
-            double[] inputPoint = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
-            double yskew = (inputArr25[1]-inputArr1[1])/25; //Compensation for slight skew in the axis
-            if(input >25)
+            double[] points = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
+
+            double yskew = (inputArr25[1] - inputArr1[1]) / 25; //Compensation for slight skew in the axis
+            if (input > 25)
             {
-              inputPoint[0] = inputArr1[0] + 10 * (input - 26);
-              inputPoint[1] = inputArr1[1] - 166 + yskew * (input - 26);
+                points[0] = inputArr1[0] + 10 * (input - 26);
+                points[1] = inputArr1[1] - 166 + yskew * (input - 26);
             }
             else
             {
-                inputPoint[0] = inputArr1[0] + 10 * (input - 1);
-                inputPoint[1] = inputArr1[1] - 166 + yskew * (input - 1);
+                points[0] = inputArr1[0] + 10 * (input - 1);
+                points[1] = inputArr1[1] + yskew * (input - 1);
             }
-            double[] initApproach = { inputPoint[0], inputPoint[1], inputPoint[2] + 200, inputPoint[3], inputPoint[4], inputPoint[5] };
-            double[] finApproach = { inputPoint[0], inputPoint[1], inputPoint[2] + 30, inputPoint[3], inputPoint[4], inputPoint[5] }; ;
+            double[] initApproach = { points[0], points[1], points[2] + 200, points[3], points[4], points[5] };
+            double[] finApproach = { points[0], points[1], points[2] + 30, points[3], points[4], points[5] };
+
+            switch (target)
+            {
+                case 1:     // case input tray
+                    {
+                        double[] tmp = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
+                        for (int i = 0; i < points.Length; i++)
+                            points[1] = tmp[i];
+
+                        yskew = (inputArr25[1] - inputArr1[1]) / 25; //Compensation for slight skew in the axis
+
+                        if (input > 25)
+                        {
+                            points[0] = inputArr1[0] + 10 * (input - 26);
+                            points[1] = inputArr1[1] - 166 + yskew * (input - 26);
+                        }
+                        else
+                        {
+                            points[0] = inputArr1[0] + 10 * (input - 1);
+                            points[1] = inputArr1[1] + yskew * (input - 1);
+                        }
+                    }
+                    break;
+
+                case 2:     // fail tray
+                    {
+                        double[] tmp = { 0, 0, failArr1[2], failArr1[3], failArr1[4], failArr1[5] };
+                        for (int i = 0; i < points.Length; i++)
+                            points[1] = tmp[i];
+
+                        yskew = (failArr25[1] - failArr1[1]) / 25; //Compensation for slight skew in the axis
+
+                        if (input > 25)
+                        {
+                            points[0] = failArr1[0] + 10 * (input - 26);
+                            points[1] = failArr1[1] - 166 + yskew * (input - 26);
+                        }
+                        else
+                        {
+                            points[0] = failArr1[0] + 10 * (input - 1);
+                            points[1] = failArr1[1] + yskew * (input - 1);
+                        }
+                    }
+                    break;
+                case 3:     // pass tray
+                    {
+                        double[] tmp = { 0, 0, passArr1[2], passArr1[3], passArr1[4], passArr1[5] };
+                        for (int i = 0; i < points.Length; i++)
+                            points[1] = tmp[i];
+
+                        yskew = (passArr25[1] - passArr1[1]) / 25; //Compensation for slight skew in the axis
+
+                        if (input > 25)
+                        {
+                            points[0] = passArr1[0] + 10 * (input - 26);
+                            points[1] = passArr1[1] - 166 + yskew * (input - 26);
+                        }
+                        else
+                        {
+                            points[0] = passArr1[0] + 10 * (input - 1);
+                            points[1] = passArr1[1] + yskew * (input - 1);
+                        }
+                    }
+                    break;
+            }
+            double[] tmp1 = { points[0], points[1], points[2] + 200, points[3], points[4], points[5] };
+            for (int ix = 0; ix < initApproach.Length; ix++)
+                initApproach[ix] = tmp1[ix];
+
+            double[] tmp2 = { points[0], points[1], points[2] + 30, points[3], points[4], points[5] };
+            for (int ij = 0; ij < finApproach.Length; ij++)
+                finApproach[ij] = tmp2[ij];
+
+            // convert to pose
             Mat initPose = Mat.FromTxyzRxyz(initApproach);
             Mat finPose = Mat.FromTxyzRxyz(finApproach);
-            Mat inputPose = Mat.FromTxyzRxyz(inputPoint);
+            Mat inputPose = Mat.FromTxyzRxyz(points);
+
+            // move to pose
             _Robot.MoveJ(initPose);
             _Robot.MoveL(finPose);
+
+            // slow linear plunge
             _Robot.SetSpeed(30);
             _Robot.MoveL(inputPose);
+
+            // Close gripper
             bool isGripped = GripCloseRdk();
+
+            // slow line ar move up
             _Robot.MoveL(finPose);
+
+            // fast linear move
             _Robot.SetSpeed(10000);
             _Robot.MoveL(initPose);
+
+            // check if we got something in the gripper
             if (isGripped)
                 return input; //return where we found a module
             else
-                return PickInput(input + 1); // no module in cuurent location, try next slot
+                return PickTray(target, input + 1); // no module in cuurent location, try next slot
+
         }
-        void PlacePass(int input = 1)
+        /////////////////////////////////////////////////////////////////////////////////////
+        /// place pass -- place into a module into a tray
+        void PlaceTray(int target, int index = 1)
         {
-            //if PickInput is correct, do the same calculations with pass points, approach, then open gripper and leave
+            if (index > 50)
+                return; //input exceeds maximum tray size, return -1 so we know tray is empty
+
+            // module to alreadt gripped
+
+            //Full implementation of point arrays needed, using initially grabbed values for now.
+            double[] points = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
+
+            double yskew = (inputArr25[1] - inputArr1[1]) / 25; //Compensation for slight skew in the axis
+            if (index > 25)
+            {
+                points[0] = inputArr1[0] + 10 * (index - 26);
+                points[1] = inputArr1[1] - 166 + yskew * (index - 26);
+            }
+            else
+            {
+                points[0] = inputArr1[0] + 10 * (index - 1);
+                points[1] = inputArr1[1] + yskew * (index - 1);
+            }
+            double[] initApproach = { points[0], points[1], points[2] + 200, points[3], points[4], points[5] };
+            double[] finApproach = { points[0], points[1], points[2] + 30, points[3], points[4], points[5] };
+
+            switch (target)
+            {
+                case 1:     // case input tray
+                    {
+                        double[] tmp = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
+                        for (int i = 0; i < points.Length; i++)
+                            points[1] = tmp[i];
+
+                        yskew = (inputArr25[1] - inputArr1[1]) / 25; //Compensation for slight skew in the axis
+
+                        if (index > 25)
+                        {
+                            points[0] = inputArr1[0] + 10 * (index - 26);
+                            points[1] = inputArr1[1] - 166 + yskew * (index - 26);
+                        }
+                        else
+                        {
+                            points[0] = inputArr1[0] + 10 * (index - 1);
+                            points[1] = inputArr1[1] + yskew * (index - 1);
+                        }
+                    }
+                    break;
+
+                case 2:     // fail tray
+                    {
+                        double[] tmp = { 0, 0, failArr1[2], failArr1[3], failArr1[4], failArr1[5] };
+                        for (int i = 0; i < points.Length; i++)
+                            points[1] = tmp[i];
+
+                        yskew = (failArr25[1] - failArr1[1]) / 25; //Compensation for slight skew in the axis
+
+                        if (index > 25)
+                        {
+                            points[0] = failArr1[0] + 10 * (index - 26);
+                            points[1] = failArr1[1] - 166 + yskew * (index - 26);
+                        }
+                        else
+                        {
+                            points[0] = failArr1[0] + 10 * (index - 1);
+                            points[1] = failArr1[1] + yskew * (index - 1);
+                        }
+                    }
+                    break;
+                case 3:     // pass tray
+                    {
+                        double[] tmp = { 0, 0, passArr1[2], passArr1[3], passArr1[4], passArr1[5] };
+                        for (int i = 0; i < points.Length; i++)
+                            points[1] = tmp[i];
+
+                        yskew = (passArr25[1] - passArr1[1]) / 25; //Compensation for slight skew in the axis
+
+                        if (index > 25)
+                        {
+                            points[0] = passArr1[0] + 10 * (index - 26);
+                            points[1] = passArr1[1] - 166 + yskew * (index - 26);
+                        }
+                        else
+                        {
+                            points[0] = passArr1[0] + 10 * (index - 1);
+                            points[1] = passArr1[1] + yskew * (index - 1);
+                        }
+                    }
+                    break;
+            }
+            double[] tmp1 = { points[0], points[1], points[2] + 200, points[3], points[4], points[5] };
+            for (int ix = 0; ix < initApproach.Length; ix++)
+                initApproach[ix] = tmp1[ix];
+
+            double[] tmp2 = { points[0], points[1], points[2] + 30, points[3], points[4], points[5] };
+            for (int ij = 0; ij < finApproach.Length; ij++)
+                finApproach[ij] = tmp2[ij];
+
+            // convert to pose
+            Mat initPose = Mat.FromTxyzRxyz(initApproach);
+            Mat finPose = Mat.FromTxyzRxyz(finApproach);
+            Mat inputPose = Mat.FromTxyzRxyz(points);
+
+            // move to pose
+            _Robot.MoveJ(initPose);
+            _Robot.MoveL(finPose);
+
+            // slow linear plunge
+            _Robot.SetSpeed(30);
+            _Robot.MoveL(inputPose);
+
+            // Open gripper
+            GripOpenRdk();
+
+            // slow line ar move up
+            _Robot.MoveL(finPose);
+
+            // fast linear move
+            _Robot.SetSpeed(10000);
+            _Robot.MoveL(initPose);
+
+            return;
+
         }
-        void PlaceFail(int input = 1)
-        {
-            //see PlacePass
-        }
+
         void PlaceTester(int testerNumber, int siteNumber)
         {
             double[] testerPoint = { 0, 0, 0, 0, 0, 0 }; //Create a blank xyzprw array
             switch (testerNumber)
             {
                 case 3:
-                    if (siteNumber >2)
+                    if (siteNumber > 2)
                     {
                         testerPoint = tester3C;
                     }
@@ -185,28 +369,95 @@ namespace KTIRobot
                     }
                     break;
             }
-            if (siteNumber%2 == 0)
+            if (siteNumber % 2 == 0)
             {
-                testerPoint[1] = testerPoint[1]-25;
+                testerPoint[1] = testerPoint[1] - 25;
             }
-            double[] initApproach = {testerPoint[0], testerPoint[1], testerPoint[2]+200, testerPoint[3], testerPoint[4], testerPoint[5]};
-            double[] finApproach = {testerPoint[0], testerPoint[1], testerPoint[2]+30, testerPoint[3], testerPoint[4], testerPoint[5]};
+            double[] initApproach = { testerPoint[0], testerPoint[1], testerPoint[2] + 200, testerPoint[3], testerPoint[4], testerPoint[5] };
+            double[] finApproach = { testerPoint[0], testerPoint[1], testerPoint[2] + 30, testerPoint[3], testerPoint[4], testerPoint[5] };
+
+            // convert to poses
             Mat initPose = Mat.FromTxyzRxyz(initApproach);
             Mat finPose = Mat.FromTxyzRxyz(finApproach);
             Mat testerPose = Mat.FromTxyzRxyz(testerPoint);
+
+            // move to the tester
             _Robot.MoveJ(initPose);
             _Robot.MoveL(finPose);
             _Robot.SetSpeed(30);
             _Robot.MoveL(testerPose);
+
+            // open gripp
             GripOpenRdk();
             _Robot.SetSpeed(10000);
             _Robot.MoveL(initPose);
-            
+
         }
         bool PickTester(int testerNumber, int siteNumber)
         {
+            // open gripp
+            GripOpenRdk();
+            
             //see place tester for calculating points. Adjust to close gripper and ensure we picked up a module
-            return false;
+            double[] testerPoint = { 0, 0, 0, 0, 0, 0 }; //Create a blank xyzprw array
+            switch (testerNumber)
+            {
+                case 3:
+                    if (siteNumber > 2)
+                    {
+                        testerPoint = tester3C;
+                    }
+                    else
+                    {
+                        testerPoint = tester3A;
+                    }
+                    break;
+                case 2:
+                    if (siteNumber > 2)
+                    {
+                        testerPoint = tester2C;
+                    }
+                    else
+                    {
+                        testerPoint = tester2A;
+                    }
+                    break;
+                default:   // case 1
+                    if (siteNumber > 2)
+                    {
+                        testerPoint = tester1C;
+                    }
+                    else
+                    {
+                        testerPoint = tester1A;
+                    }
+                    break;
+            }
+            if (siteNumber % 2 == 0)
+            {
+                testerPoint[1] = testerPoint[1] - 25;
+            }
+            double[] initApproach = { testerPoint[0], testerPoint[1], testerPoint[2] + 200, testerPoint[3], testerPoint[4], testerPoint[5] };
+            double[] finApproach = { testerPoint[0], testerPoint[1], testerPoint[2] + 30, testerPoint[3], testerPoint[4], testerPoint[5] };
+
+            // convert to poses
+            Mat initPose = Mat.FromTxyzRxyz(initApproach);
+            Mat finPose = Mat.FromTxyzRxyz(finApproach);
+            Mat testerPose = Mat.FromTxyzRxyz(testerPoint);
+
+            // move to the tester
+            _Robot.MoveJ(initPose);
+            _Robot.MoveL(finPose);
+            _Robot.SetSpeed(30);
+            _Robot.MoveL(testerPose);
+
+            // close gripper
+            bool retVal = GripCloseRdk();
+            _Robot.MoveL(finPose);
+            _Robot.SetSpeed(10000);
+            _Robot.MoveL(initPose);
+
+            return retVal;
         }
     }
 }
