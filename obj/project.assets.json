@@ -12,6 +12,15 @@
           "lib/net45/RoboDkApi.dll": {},
           "lib/net45/System.ValueTuple.dll": {}
         }
+      },
+      "RoboDKHelper/1.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/RoboDKHelper.dll": {}
+        },
+        "runtime": {
+          "lib/RoboDKHelper.dll": {}
+        }
       }
     },
     ".NETFramework,Version=v4.7.2/win": {
@@ -24,6 +33,15 @@
         "runtime": {
           "lib/net45/RoboDkApi.dll": {},
           "lib/net45/System.ValueTuple.dll": {}
+        }
+      },
+      "RoboDKHelper/1.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/RoboDKHelper.dll": {}
+        },
+        "runtime": {
+          "lib/RoboDKHelper.dll": {}
         }
       }
     },
@@ -38,6 +56,15 @@
           "lib/net45/RoboDkApi.dll": {},
           "lib/net45/System.ValueTuple.dll": {}
         }
+      },
+      "RoboDKHelper/1.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/RoboDKHelper.dll": {}
+        },
+        "runtime": {
+          "lib/RoboDKHelper.dll": {}
+        }
       }
     },
     ".NETFramework,Version=v4.7.2/win-x86": {
@@ -50,6 +77,15 @@
         "runtime": {
           "lib/net45/RoboDkApi.dll": {},
           "lib/net45/System.ValueTuple.dll": {}
+        }
+      },
+      "RoboDKHelper/1.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/RoboDKHelper.dll": {}
+        },
+        "runtime": {
+          "lib/RoboDKHelper.dll": {}
         }
       }
     }
@@ -73,10 +109,24 @@
         "robodkapi.4.2.3.nupkg.sha512",
         "robodkapi.nuspec"
       ]
+    },
+    "RoboDKHelper/1.0.1": {
+      "sha512": "nScADXXzJJeLYANM0P5l89tsArJDYv2lk62peU+yYr5/71Wzvn6lMh4q8sYMLh65acTzoQMu+DZGhFzjknFrVw==",
+      "type": "package",
+      "path": "robodkhelper/1.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/RoboDKHelper.dll",
+        "lib/RoboDKHelper.xml",
+        "robodkhelper.1.0.1.nupkg.sha512",
+        "robodkhelper.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     ".NETFramework,Version=v4.7.2": [
+      "RoboDKHelper >= 1.0.1",
       "RoboDkApi >= 4.2.3"
     ]
   },
@@ -118,6 +168,10 @@
     "frameworks": {
       "net472": {
         "dependencies": {
+          "RoboDKHelper": {
+            "target": "Package",
+            "version": "[1.0.1, )"
+          },
           "RoboDkApi": {
             "target": "Package",
             "version": "[4.2.3, )"

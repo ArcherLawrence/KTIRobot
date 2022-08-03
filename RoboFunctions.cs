@@ -36,50 +36,72 @@ namespace KTIRobot
         public double[] passArr1 = { 180.04, -344.97, 216.05, -179.32, -0.71, 133.67 };
         public double[] passArr25 = { 419.99, -342.50, 214.66, -179.31, -0.71, 133.68 };
 
-        // retrieve the reference frame and the tool frame (TCP) as poses
-        Mat frame = null;
-        Mat tool = null;
-        void Initializer()
-        {
-            frame = _Robot.PoseFrame();
-            tool = _Robot.PoseTool();
-        }
         void GripOpenRdk()
         {
-            double[] joints = _Robot.Joints();
 
-            _Robot.setDO("15", "0");
-            _Robot.MoveJ(joints);
-            _Robot.Pause(50);
+            _robot.setDO("15", "0");
+            _robot.Pause(150);
 
+            _robot.setDO("14", "0");
+            _robot.Pause(150);
 
-            _Robot.setDO("14", "0");
-            _Robot.MoveJ(joints);
-            _Robot.Pause(50);
-
-            _Robot.setDO("14", "1");   // close
-            _Robot.MoveJ(joints);
-            _Robot.Pause(50);
+            _robot.setDO("14", "1");   // close
+            _robot.Pause(150);
             return;
         }
         bool GripCloseRdk(int retry = 1)
         {
-            double []joints = _Robot.Joints();
+            double []joints = _robot.Joints();
                 
-            _Robot.setDO("15", "0");
-            _Robot.MoveJ(joints);
-            _Robot.Pause(50);
+            _robot.setDO("15", "0");
+            _robot.Pause(150);
 
-            _Robot.setDO("14", "0");
-            _Robot.MoveJ(joints);
-            _Robot.Pause(50);
+            _robot.setDO("14", "0");
+            _robot.Pause(150);
 
-            _Robot.setDO("15", "1");   // close
-            _Robot.MoveJ(joints);
-            _Robot.Pause(50);
+            _robot.setDO("15", "1");   // close
+            _robot.Pause(150);
 
-            return true;
+            _robot.Pause(150);
 
+             string closeSensor = _robot.SetParam("Driver", "GET $IN[12]");
+            _robot.Pause(150);
+
+            string openSensor = _robot.SetParam("Driver", "GET $IN[13]");
+            if (closeSensor.Equals("1"))
+            {
+                if (retry >= 1) // First attempt failed, retry once
+                    GripCloseRdk(0);
+                else
+                {
+                    //Grip failed, set LED to red and return false
+                    _robot.setDO("11", "1");
+                    _robot.Pause(30);
+                    _robot.setDO("10", "1");
+                    return false;
+                }
+            }
+            else
+            {
+                if (openSensor.Equals("1"))
+                {
+                    //This case should not be possible, but if we end up here, set LED to yellow and return false
+                    _robot.setDO("10", "1");
+                    _robot.Pause(30);
+                    _robot.setDO("11", "0");
+                    return false;
+                }
+                else
+                {
+                    // not open and not closed -- so we have a module
+
+                    _robot.setDO("10", "0");
+                    _robot.Pause(30);
+                    _robot.setDO("11", "1");
+                    return true;
+                }
+            }
+            return false;
         }
         int PickTray(int target, int input = 1)
         {
@@ -184,22 +206,22 @@ namespace KTIRobot
             Mat inputPose = Mat.FromTxyzRxyz(points);
 
             // move to pose
-            _Robot.MoveJ(initPose);
-            _Robot.MoveL(finPose);
+            _robot.MoveJ(initPose);
+            _robot.MoveL(finPose);
 
             // slow linear plunge
-            _Robot.SetSpeed(30);
-            _Robot.MoveL(inputPose);
+            _robot.SetSpeed(30);
+            _robot.MoveL(inputPose);
 
             // Close gripper
             bool isGripped = GripCloseRdk();
 
             // slow line ar move up
-            _Robot.MoveL(finPose);
+            _robot.MoveL(finPose);
 
             // fast linear move
-            _Robot.SetSpeed(10000);
-            _Robot.MoveL(initPose);
+            _robot.SetSpeed(10000);
+            _robot.MoveL(initPose);
 
             // check if we got something in the gripper
             if (isGripped)
@@ -312,22 +334,22 @@ namespace KTIRobot
             Mat inputPose = Mat.FromTxyzRxyz(points);
 
             // move to pose
-            _Robot.MoveJ(initPose);
-            _Robot.MoveL(finPose);
+            _robot.MoveJ(initPose);
+            _robot.MoveL(finPose);
 
             // slow linear plunge
-            _Robot.SetSpeed(30);
-            _Robot.MoveL(inputPose);
+            _robot.SetSpeed(30);
+            _robot.MoveL(inputPose);
 
             // Open gripper
             GripOpenRdk();
 
             // slow line ar move up
-            _Robot.MoveL(finPose);
+            _robot.MoveL(finPose);
 
             // fast linear move
-            _Robot.SetSpeed(10000);
-            _Robot.MoveL(initPose);
+            _robot.SetSpeed(10000);
+            _robot.MoveL(initPose);
 
             return;
 
@@ -382,15 +404,15 @@ namespace KTIRobot
             Mat testerPose = Mat.FromTxyzRxyz(testerPoint);
 
             // move to the tester
-            _Robot.MoveJ(initPose);
-            _Robot.MoveL(finPose);
-            _Robot.SetSpeed(30);
-            _Robot.MoveL(testerPose);
+            _robot.MoveJ(initPose);
+            _robot.MoveL(finPose);
+            _robot.SetSpeed(30);
+            _robot.MoveL(testerPose);
 
             // open gripp
             GripOpenRdk();
-            _Robot.SetSpeed(10000);
-            _Robot.MoveL(initPose);
+            _robot.SetSpeed(10000);
+            _robot.MoveL(initPose);
 
         }
         bool PickTester(int testerNumber, int siteNumber)
@@ -446,16 +468,16 @@ namespace KTIRobot
             Mat testerPose = Mat.FromTxyzRxyz(testerPoint);
 
             // move to the tester
-            _Robot.MoveJ(initPose);
-            _Robot.MoveL(finPose);
-            _Robot.SetSpeed(30);
-            _Robot.MoveL(testerPose);
+            _robot.MoveJ(initPose);
+            _robot.MoveL(finPose);
+            _robot.SetSpeed(30);
+            _robot.MoveL(testerPose);
 
             // close gripper
             bool retVal = GripCloseRdk();
-            _Robot.MoveL(finPose);
-            _Robot.SetSpeed(10000);
-            _Robot.MoveL(initPose);
+            _robot.MoveL(finPose);
+            _robot.SetSpeed(10000);
+            _robot.MoveL(initPose);
 
             return retVal;
         }
