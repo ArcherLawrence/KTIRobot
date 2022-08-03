@@ -56,8 +56,49 @@ namespace KTIRobot
                 //RDK = new RoboDK("", START_HIDDEN); // default connection, starts RoboDK visible if it has not been started
                 //RDK = new RoboDK("localhost", false, 20599); //start visible, use specific communication port to not interfere with other applications
                 //RDK = new RoboDK("localhost", true, 20599); //start hidden,  use specific communication port to not interfere with other applications
-
+                InitMoveRobot();
             }
+        }
+        private void InitMoveRobot()
+        {
+            _robot.SetSpeed(50);
+            _robot.Pause(100);
+
+            double[] joints = _robot.JointsHome();
+            double home0 = joints[0];
+            while (_robot.Busy())
+                _robot.Pause(50);
+
+            _robot.MoveJ(joints);
+
+            //wiggle
+
+            for (int i = 0; i < 6; i++)
+            {
+                switch (i % 3)
+                {
+                    case 0:
+                        joints[0] = home0 - 10;
+                        break;
+                    case 1:
+                        joints[0] = home0;
+                        break;
+                    case 2:
+                        joints[0] = home0 + 10;
+                        break;
+                }
+                while (_robot.Busy())
+                    _robot.Pause(50);
+                _robot.MoveJ(joints);
+            }
+            joints[0] = 160.0;
+            //while (_Robot.Busy())
+            //    _Robot.Pause(50);
+            joints[2] = 30.0;
+            _robot.MoveJ(joints);
+            while (_robot.Busy())
+                _robot.Pause(50);
+
         }
         /// <summary>
         ///     Check if the RDK object is ready.
@@ -168,13 +209,17 @@ namespace KTIRobot
         private void RunRobot()             // void rad_RunMode_Online_CheckedChanged(object sender, EventArgs e)
         {
             // Check that there is a link with RoboDK:
-            if (!Check_ROBOT()) return;
+            if (!Check_ROBOT())
+                return;
 
             // Important: stop any previous program generation (if we selected offline programming mode)
             _rdk.Disconnect();
 
+            Check_RDK();        // arl
+            Check_ROBOT();
+
             // Connect to real robot
-            if (_robot.Connect())
+            if (_robot.Connect() || (_robot.ConnectedState() == RobotConnectionType.Ready ))
             {
                 // Set to Run on Robot robot mode:
                 _rdk.SetRunMode(RunMode.RunRobot);
