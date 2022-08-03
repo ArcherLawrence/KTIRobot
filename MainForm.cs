@@ -1,25 +1,152 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
+using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using RoboDk.API;
+using RoboDk.API.Exceptions;
 using RoboDk.API.Model;
+using KTIRobot.Properties;
+
 namespace KTIRobot
 {
     public partial class MainForm : Form
     {
-        RoboDK _Rdk = null;
-        IItem _Robot = null;
-        IItem _Gripper = null;
+        // Define if the robot movements will be blocking
+        private const bool MoveBlocking = false;
+
+        // RDK holds the main object to interact with RoboDK.
+        // The RoboDK application starts when a RoboDK object is created.
+        private IRoboDK _rdk;
+
+        // Keep the ROBOT item as a global variable
+        private IItem _robot;
+
         public MainForm()
         {
             InitializeComponent();
+        }
 
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            // This will create a new icon in the windows toolbar that shows how we can lock/unlock the application
+            // Setup_Notification_Icon();
+
+            // Start RoboDK here if we want to start it before the Form is displayed
+            if (!Check_RDK())
+            {
+                // RoboDK starts here. We can optionally pass arguments to start it hidden or start it remotely on another computer provided the computer IP.
+                // If RoboDK was already running it will just connect to the API. We can force a new RoboDK instance and specify a communication port
+                _rdk = new RoboDK();
+
+                // Check if RoboDK started properly
+                if (Check_RDK())
+                {
+                    notifybar.Text = @"RoboDK is Running...";
+
+                    // attempt to auto select the robot:
+                    SelectRobot();
+                }
+
+                // other ways to Start RoboDK
+                //bool START_HIDDEN = false;
+                //RDK = new RoboDK("", START_HIDDEN); // default connection, starts RoboDK visible if it has not been started
+                //RDK = new RoboDK("localhost", false, 20599); //start visible, use specific communication port to not interfere with other applications
+                //RDK = new RoboDK("localhost", true, 20599); //start hidden,  use specific communication port to not interfere with other applications
+
+            }
+        }
+        /// <summary>
+        ///     Check if the RDK object is ready.
+        ///     Returns True if the RoboDK API is available or False if the RoboDK API is not available.
+        /// </summary>
+        /// <returns></returns>
+        public bool Check_RDK()
+        {
+            // check if the RDK object has been initialized:
+            if (_rdk == null)
+            {
+                notifybar.Text = @"RoboDK has not been started";
+                return false;
+            }
+
+            // Check if the RDK API is connected
+            if (!_rdk.Connected())
+            {
+                notifybar.Text = @"Connecting to RoboDK...";
+                // Attempt to connect to the RDK API
+                if (!_rdk.Connect())
+                {
+                    notifybar.Text = @"Problems using the RoboDK API. The RoboDK API is not available...";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        ///     Update the ROBOT variable by choosing the robot available in the currently open station
+        ///     If more than one robot is available, a popup will be displayed
+        /// </summary>
+        public void SelectRobot()
+        {
+            notifybar.Text = @"Selecting robot...";
+            if (!Check_RDK())
+            {
+                _robot = null;
+                return;
+            }
+
+            var status = _rdk.AddFile("C:\\KTIProjects\\KTIRobot\\ShelfTableA.rdk");
+            _robot = _rdk.GetItemByName("Mitsubishi RV-8CRL", ItemType.Robot);
+
+            if (_robot.Valid())
+            {
+                _robot.NewLink(); // This will create a new communication link (another instance of the RoboDK API), this is useful if we are moving 2 robots at the same time.                
+                notifybar.Text = $@"Using robot: {_robot.Name()}";
+            }
+            else
+            {
+                notifybar.Text = @"Mit.RV8 Robot not available";
+            }
+            RunRobot();
+        }
+
+        /// <summary>
+        ///     Check if the ROBOT object is available and valid. It will make sure that we can operate with the ROBOT object.
+        /// </summary>
+        /// <returns></returns>
+        public bool Check_ROBOT(bool ignoreBusyStatus = false)
+        {
+            if (!Check_RDK()) return false;
+            if (_robot == null || !_robot.Valid())
+            {
+                notifybar.Text = @"A robot has not been selected. Load a station or a robot file first.";
+                return false;
+            }
+
+            try
+            {
+                notifybar.Text = $@"Using robot: {_robot.Name()}";
+            }
+            catch (RdkException rdkException)
+            {
+                notifybar.Text = $@"The robot has been deleted: {rdkException.Message}";
+                return false;
+            }
+
+            // Safe check: If we are doing non blocking movements, we can check if the robot is doing other movements with the Busy command
+            // ReSharper disable once RedundantLogicalConditionalExpressionOperand
+            if (!MoveBlocking && !ignoreBusyStatus && _robot.Busy())
+            {
+                notifybar.Text = @"The robot is busy!! Try later...";
+                return false;
+            }
+
+            return true;
         }
         /// <summary>
         ///     Close all the stations available in RoboDK (top level items)
@@ -28,123 +155,54 @@ namespace KTIRobot
         public void CloseAllStations()
         {
             // Get all the RoboDK stations available
-            var allStations = _Rdk.GetItemList(RoboDk.API.Model.ItemType.Station);
+            var allStations = _rdk.GetItemList(ItemType.Station);
             foreach (var station in allStations)
             {
-                //notifybar.Text = $@"Closing {station.Name()}";
+                notifybar.Text = $@"Closing {station.Name()}";
                 // this will close a station without asking to save:
                 station.Delete();
             }
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+
+        private void RunRobot()             // void rad_RunMode_Online_CheckedChanged(object sender, EventArgs e)
         {
-            _Rdk = new RoboDK();
-            _Rdk.Connect();
-          
+            // Check that there is a link with RoboDK:
+            if (!Check_ROBOT()) return;
 
-            var status = _Rdk.AddFile("C:\\KTIProjects\\KTIRobot\\ShelfTableA.rdk");
-            _Rdk.SetRunMode(RoboDk.API.Model.RunMode.RunRobot);
+            // Important: stop any previous program generation (if we selected offline programming mode)
+            _rdk.Disconnect();
 
-            _Robot = _Rdk.GetItemByName("Mitsubishi RV-8CRL", RoboDk.API.Model.ItemType.Robot);
-            _Robot.Connect();
-            // _Robot.SetRunType(ProgramExecutionType.RunOnRobot);
-
-            if (_Robot.Valid())
+            // Connect to real robot
+            if (_robot.Connect())
             {
-                while (_Robot.Busy())
-                    _Robot.Pause(50);
-                _Robot.Pause(100);
-                _Robot.NewLink();
+                // Set to Run on Robot robot mode:
+                _rdk.SetRunMode(RunMode.RunRobot);
             }
             else
-                return;
-
-            _Robot.SetSpeed(50);
-            _Robot.Pause(100);
-            //while (_Robot.Busy())
-            //    _Robot.Pause(50);
-            //_Robot = _Rdk.GetItemByName("SchunkGripper", RoboDk.API.Model.ItemType.Any);
-
-            _Robot.Pause(100);
-            //while (_Robot.Busy())
-            //    _Robot.Pause(50);
-            double[] joints = _Robot.JointsHome();
-            double home0 = joints[0];
-            _Robot.Pause(500);
-            while (_Robot.Busy())
-                _Robot.Pause(50);
-            
-            _Robot.MoveJ(joints);
-
-            //wiggle
-
-            for (int i = 0; i < 6; i++)
             {
-                switch (i % 3)
-                {
-                    case 0:
-                        joints[0] = home0 - 10;
-                        break;
-                    case 1:
-                        joints[0] = home0;
-                        break;
-                    case 2:
-                        joints[0] = home0 + 10;
-                        break;
-                }
-                _Robot.Pause(100);
-                while (_Robot.Busy())
-                    _Robot.Pause(50);
-                _Robot.MoveJ(joints);
+                notifybar.Text = @"Can't connect to the robot. Check connection and parameters.";
             }
-            joints[0] = 160.0;
-            //while (_Robot.Busy())
-            //    _Robot.Pause(50);
-            joints[2] = 30.0;
-            _Robot.MoveJ(joints);
-            _Robot.Pause(100);
-            Initializer();
-            while (true)
-            {
-                _Robot.Pause(100);
-
-                GripOpenRdk();
-
-                _Robot.Pause(100);
-                GripCloseRdk(100);
-            }
-
         }
-
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
         }
 
         private void ExitBtn_Click(object sender, EventArgs e)
         {
-            double[] joints = _Robot.JointsHome();
-            while (_Robot.Busy())
-                _Robot.Pause(50);
-            _Robot.MoveJ(joints);
-            while (_Robot.Busy())
-                _Robot.Pause(50);
-
             CloseAllStations();
             Application.Exit();
         }
 
         private void GripClose_Click(object sender, EventArgs e)
         {
-            //GripCloseRdk();
-            _Robot.RunCodeCustom("C:\\KTIProjects\\KTIRobot\\GRIPCLOSE.prg", RoboDk.API.Model.ProgramRunType.CallProgram);
+            GripCloseRdk(1);
         }
 
 
         private void GripOpen_Click(object sender, EventArgs e)
         {
-            // GripOpenRdk();
-            _Robot.RunCodeCustom("GRIPOPEN.prg", RoboDk.API.Model.ProgramRunType.CallProgram);
+            GripOpenRdk();
         }
     }
 }

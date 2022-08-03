@@ -31,14 +31,15 @@ namespace KTIRobot
         {
             this.ExitBtn = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.GripOpen = new System.Windows.Forms.Button();
             this.GripClose = new System.Windows.Forms.Button();
+            this.GripOpen = new System.Windows.Forms.Button();
+            this.notifybar = new System.Windows.Forms.StatusStrip();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ExitBtn
             // 
-            this.ExitBtn.Location = new System.Drawing.Point(713, 415);
+            this.ExitBtn.Location = new System.Drawing.Point(704, 357);
             this.ExitBtn.Name = "ExitBtn";
             this.ExitBtn.Size = new System.Drawing.Size(75, 23);
             this.ExitBtn.TabIndex = 0;
@@ -57,16 +58,6 @@ namespace KTIRobot
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Gripper";
             // 
-            // GripOpen
-            // 
-            this.GripOpen.Location = new System.Drawing.Point(6, 46);
-            this.GripOpen.Name = "GripOpen";
-            this.GripOpen.Size = new System.Drawing.Size(75, 23);
-            this.GripOpen.TabIndex = 0;
-            this.GripOpen.Text = "Open";
-            this.GripOpen.UseVisualStyleBackColor = true;
-            this.GripOpen.Click += new System.EventHandler(this.GripOpen_Click);
-            // 
             // GripClose
             // 
             this.GripClose.Location = new System.Drawing.Point(8, 76);
@@ -77,11 +68,30 @@ namespace KTIRobot
             this.GripClose.UseVisualStyleBackColor = true;
             this.GripClose.Click += new System.EventHandler(this.GripClose_Click);
             // 
+            // GripOpen
+            // 
+            this.GripOpen.Location = new System.Drawing.Point(6, 46);
+            this.GripOpen.Name = "GripOpen";
+            this.GripOpen.Size = new System.Drawing.Size(75, 23);
+            this.GripOpen.TabIndex = 0;
+            this.GripOpen.Text = "Open";
+            this.GripOpen.UseVisualStyleBackColor = true;
+            this.GripOpen.Click += new System.EventHandler(this.GripOpen_Click);
+            // 
+            // notifybar
+            // 
+            this.notifybar.Location = new System.Drawing.Point(0, 428);
+            this.notifybar.Name = "notifybar";
+            this.notifybar.Size = new System.Drawing.Size(800, 22);
+            this.notifybar.TabIndex = 2;
+            this.notifybar.Text = "Notification";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.notifybar);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.ExitBtn);
             this.Name = "MainForm";
@@ -90,6 +100,7 @@ namespace KTIRobot
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -99,6 +110,7 @@ namespace KTIRobot
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button GripOpen;
         private System.Windows.Forms.Button GripClose;
+        private System.Windows.Forms.StatusStrip notifybar;
     }
 }
 

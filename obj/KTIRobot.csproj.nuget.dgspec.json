@@ -38,6 +38,10 @@
       "frameworks": {
         "net472": {
           "dependencies": {
+            "RoboDKHelper": {
+              "target": "Package",
+              "version": "[1.0.1, )"
+            },
             "RoboDkApi": {
               "target": "Package",
               "version": "[4.2.3, )"

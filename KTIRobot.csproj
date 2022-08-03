@@ -86,6 +86,9 @@
     <PackageReference Include="RoboDkApi">
       <Version>4.2.3</Version>
     </PackageReference>
+    <PackageReference Include="RoboDKHelper">
+      <Version>1.0.1</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
