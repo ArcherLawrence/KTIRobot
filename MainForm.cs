@@ -42,6 +42,7 @@ namespace KTIRobot
                 // If RoboDK was already running it will just connect to the API. We can force a new RoboDK instance and specify a communication port
                 _rdk = new RoboDK();
 
+
                 // Check if RoboDK started properly
                 if (Check_RDK())
                 {
@@ -61,16 +62,37 @@ namespace KTIRobot
         }
         private void InitMoveRobot()
         {
-            _robot.SetSpeed(50);
-            _robot.Pause(100);
+            outReg = 0;
+            _robot.setDO(0000.ToString("X4"), outReg.ToString("X4"));
+            //_robot.SetSpeed(5000);
+            //while (_robot.Busy())
+            //    _robot.Pause(500);
 
             double[] joints = _robot.JointsHome();
             double home0 = joints[0];
-            while (_robot.Busy())
-                _robot.Pause(50);
+            //while (_robot.Busy())
+            //    _robot.Pause(50);
 
-            _robot.MoveJ(joints);
-
+            //_robot.Disconnect();
+            //_robot.ConnectSafe();
+            //while (_robot.Busy())
+            //    _robot.Pause(50);
+            try { _robot.MoveJ(joints); }
+            catch {
+                if(!Check_RDK())
+                {
+                    _rdk.Disconnect();
+                    _rdk.Connect();
+                }
+                if (Check_ROBOT())
+                {
+                    _robot.Disconnect();
+                    _robot.ConnectSafe();
+                }
+                while (_robot.Busy())
+                    _robot.Pause(50);
+                _robot.MoveJ(joints);
+            }
             //wiggle
 
             for (int i = 0; i < 6; i++)
@@ -89,13 +111,29 @@ namespace KTIRobot
                 }
                 while (_robot.Busy())
                     _robot.Pause(50);
-                _robot.MoveJ(joints);
+                try { _robot.MoveJ(joints); }
+                catch
+                {
+                    _robot.Disconnect();
+                    _robot.ConnectSafe();
+                    while (_robot.Busy())
+                        _robot.Pause(50);
+                    _robot.MoveJ(joints);
+                }
             }
             joints[0] = 160.0;
-            //while (_Robot.Busy())
-            //    _Robot.Pause(50);
+            while (_robot.Busy())
+                _robot.Pause(50);
             joints[2] = 30.0;
-            _robot.MoveJ(joints);
+            try { _robot.MoveJ(joints); }
+            catch
+            {
+                _robot.Disconnect();
+                _robot.ConnectSafe();
+                while (_robot.Busy())
+                    _robot.Pause(50);
+                _robot.MoveJ(joints);
+            }
             while (_robot.Busy())
                 _robot.Pause(50);
 
@@ -140,10 +178,14 @@ namespace KTIRobot
                 _robot = null;
                 return;
             }
-
-            var status = _rdk.AddFile("C:\\KTIProjects\\KTIRobot\\ShelfTableA.rdk");
             _robot = _rdk.GetItemByName("Mitsubishi RV-8CRL", ItemType.Robot);
-
+            if ((_robot != null) || (_robot.ConnectedState() != RobotConnectionType.Ready))
+            {
+                var status = _rdk.AddFile("C:\\KTIProjects\\KTIRobot\\ShelfTableA.rdk");
+                _robot = _rdk.GetItemByName("Mitsubishi RV-8CRL", ItemType.Robot);
+            }
+            _robot.SetSpeed(10000);
+            _robot.ConnectSafe();
             if (_robot.Valid())
             {
                 _robot.NewLink(); // This will create a new communication link (another instance of the RoboDK API), this is useful if we are moving 2 robots at the same time.                

@@ -35,73 +35,145 @@ namespace KTIRobot
         public double[] failArr25 = { 419.00, +100.00, 217.04, -179.31, -0.71, 133.68 };
         public double[] passArr1 = { 180.04, -344.97, 216.05, -179.32, -0.71, 133.67 };
         public double[] passArr25 = { 419.99, -342.50, 214.66, -179.31, -0.71, 133.68 };
+        public int outReg;
+        public void SetBit(int sigNum)
+        {
+            if ((sigNum >= 0) && (sigNum < 16))
+            {
+                outReg |= (1 << sigNum);
+                _robot.setDO("0000", outReg.ToString("X4"));
+            }
+        }
+        public void ClrBit(int sigNum)
+        {
+            if ((sigNum >= 0) && (sigNum < 16))
+            {
+                outReg &= ~(1 << sigNum);
+                _robot.setDO("0000", outReg.ToString("X4"));
+            }
+        }
+        public enum eLED_COLOR { eLED_RED, eLED_GREEN, eLED_YELLOW, eLED_NONE };
+
+        public void SetLED(eLED_COLOR eColor)
+        {
+            switch (eColor)
+            {
+                case eLED_COLOR.eLED_RED:
+                    SetBit(10);             // _robot.setDO("10", "1");
+                    _robot.Pause(30);
+                    SetBit(11);             // _robot.setDO("11", "0");
+                    break;
+                case eLED_COLOR.eLED_NONE:
+                    ClrBit(10);
+                    _robot.Pause(30);
+                    ClrBit(10);
+                    break;
+                case eLED_COLOR.eLED_YELLOW:
+                    SetBit(10);         // _robot.setDO("11", "0");
+                    _robot.Pause(30);
+                    ClrBit(11);         // _robot.setDO("10", "1");
+                    break;
+                case eLED_COLOR.eLED_GREEN:
+                    ClrBit(10);         // _robot.setDO("10", "0");
+                    _robot.Pause(30);
+                    SetBit(11);         // _robot.setDO("11", "1");
+                    break;
+            }
+            return;
+        }
 
         void GripOpenRdk()
         {
-
-            _robot.setDO("15", "0");
+            ClrBit(15);         // _robot.setDO("15", "0");
             _robot.Pause(150);
 
-            _robot.setDO("14", "0");
+            ClrBit(14);         // _robot.setDO("14", "0");
             _robot.Pause(150);
 
-            _robot.setDO("14", "1");   // close
+            SetBit(14);         // _robot.setDO("14", "1");   // close
             _robot.Pause(150);
+
+            SetLED(eLED_COLOR.eLED_NONE);
             return;
         }
         bool GripCloseRdk(int retry = 1)
         {
-            double []joints = _robot.Joints();
-                
-            _robot.setDO("15", "0");
+            double[] joints = _robot.Joints();
+
+            //_robot.setDO("15", "0");
+            //_robot.Pause(150);
+
+            //_robot.setDO("14", "0");
+            //_robot.Pause(150);
+
+            //_robot.setDO("15", "1");   // close
+            //_robot.Pause(150);
+
+            ClrBit(15);             // _robot.setDO("15", "0");
+            _robot.Pause(150);
+            SetBit(14);             // _robot.setDO("14", "1");
+            _robot.Pause(150);
+            ClrBit(14);             // _robot.setDO("14", "0");
+            _robot.Pause(300);
+            SetBit(15);             // _robot.setDO("15", "1");
             _robot.Pause(150);
 
-            _robot.setDO("14", "0");
-            _robot.Pause(150);
+            while (_robot.Busy())
+                _robot.Pause(100);
 
-            _robot.setDO("15", "1");   // close
-            _robot.Pause(150);
+            // string closeSensor = _robot.SetParam("Driver", "GET $IN[12]");
+            string closeSensor = _robot.SetParam("Driver", "GETDI 12");
+            while (string.IsNullOrEmpty(closeSensor))
+                closeSensor = _robot.SetParam("Driver", "GETDI 12");
 
-            _robot.Pause(150);
+            while (_robot.Busy())
+                _robot.Pause(100);
 
-             string closeSensor = _robot.SetParam("Driver", "GET $IN[12]");
-            _robot.Pause(150);
+            // string openSensor = _robot.SetParam("Driver", "GET $IN[13]");
+            string openSensor = _robot.SetParam("Driver", "GETDI 13");
+            while (string.IsNullOrEmpty(openSensor))
+                openSensor = _robot.SetParam("Driver", "GETDI 13");
 
-            string openSensor = _robot.SetParam("Driver", "GET $IN[13]");
-            if (closeSensor.Equals("1"))
+
+            int close = -1;
+            int open = -1;
+            if (!Int32.TryParse(closeSensor, out close))
             {
-                if (retry >= 1) // First attempt failed, retry once
-                    GripCloseRdk(0);
-                else
-                {
-                    //Grip failed, set LED to red and return false
-                    _robot.setDO("11", "1");
-                    _robot.Pause(30);
-                    _robot.setDO("10", "1");
-                    return false;
-                }
+                _robot.Pause(500);
+                closeSensor = _robot.SetParam("Driver", "GETDI 12");
+                _robot.Pause(300);
+                Int32.TryParse(closeSensor, out close);
+            }
+            if (!Int32.TryParse(openSensor, out open))
+            {
+                _robot.Pause(500);
+                openSensor = _robot.SetParam("Driver", "GETDI 13");
+                _robot.Pause(300);
+                Int32.TryParse(openSensor, out open);
+            }
+            close &= 1;
+            open &= 1;
+            if (close == 1)
+            {
+                //Grip failed, set LED to red and return false
+                SetLED(eLED_COLOR.eLED_RED);
+                return false;
             }
             else
             {
-                if (openSensor.Equals("1"))
+                if (open == 1)
                 {
                     //This case should not be possible, but if we end up here, set LED to yellow and return false
-                    _robot.setDO("10", "1");
-                    _robot.Pause(30);
-                    _robot.setDO("11", "0");
+                    SetLED(eLED_COLOR.eLED_YELLOW);
                     return false;
                 }
                 else
                 {
                     // not open and not closed -- so we have a module
-
-                    _robot.setDO("10", "0");
-                    _robot.Pause(30);
-                    _robot.setDO("11", "1");
+                    SetLED(eLED_COLOR.eLED_GREEN);
                     return true;
                 }
             }
-            return false;
         }
         int PickTray(int target, int input = 1)
         {
@@ -419,7 +491,7 @@ namespace KTIRobot
         {
             // open gripp
             GripOpenRdk();
-            
+
             //see place tester for calculating points. Adjust to close gripper and ensure we picked up a module
             double[] testerPoint = { 0, 0, 0, 0, 0, 0 }; //Create a blank xyzprw array
             switch (testerNumber)
