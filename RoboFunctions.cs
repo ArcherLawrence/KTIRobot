@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RoboDk.API;
@@ -35,13 +36,16 @@ namespace KTIRobot
         public double[] failArr25 = { 419.00, +100.00, 217.04, -179.31, -0.71, 133.68 };
         public double[] passArr1 = { 180.04, -344.97, 216.05, -179.32, -0.71, 133.67 };
         public double[] passArr25 = { 419.99, -342.50, 214.66, -179.31, -0.71, 133.68 };
-        public int outReg;
+        public int outReg = 0;
         public void SetBit(int sigNum)
         {
             if ((sigNum >= 0) && (sigNum < 16))
             {
                 outReg |= (1 << sigNum);
-                _robot.setDO("0000", outReg.ToString("X4"));
+                // int outVal = outReg >> sigNum;
+                //_robot.setDO(sigNum.ToString("X4"), outVal.ToString("X4"));
+                //_robot.setDO("0000", outReg.ToString("X4"));
+                _robot.SetParam("Driver", "SETDO 0000 " + outReg.ToString("X4"));
             }
         }
         public void ClrBit(int sigNum)
@@ -49,7 +53,8 @@ namespace KTIRobot
             if ((sigNum >= 0) && (sigNum < 16))
             {
                 outReg &= ~(1 << sigNum);
-                _robot.setDO("0000", outReg.ToString("X4"));
+                // _robot.setDO("0000", outReg.ToString("X4"));
+                _robot.SetParam("Driver", "SETDO 0000 " + outReg.ToString("X4"));
             }
         }
         public enum eLED_COLOR { eLED_RED, eLED_GREEN, eLED_YELLOW, eLED_NONE };
@@ -61,12 +66,12 @@ namespace KTIRobot
                 case eLED_COLOR.eLED_RED:
                     SetBit(10);             // _robot.setDO("10", "1");
                     _robot.Pause(30);
-                    SetBit(11);             // _robot.setDO("11", "0");
+                    SetBit(11);             // _robot.setDO("11", "1");
                     break;
                 case eLED_COLOR.eLED_NONE:
                     ClrBit(10);
                     _robot.Pause(30);
-                    ClrBit(10);
+                    ClrBit(11);
                     break;
                 case eLED_COLOR.eLED_YELLOW:
                     SetBit(10);         // _robot.setDO("11", "0");
@@ -100,39 +105,43 @@ namespace KTIRobot
         {
             double[] joints = _robot.Joints();
 
-            //_robot.setDO("15", "0");
-            //_robot.Pause(150);
+            _robot.setDO("15", "0");
+            _robot.Pause(50);
 
-            //_robot.setDO("14", "0");
-            //_robot.Pause(150);
+            _robot.setDO("14", "0");
+            _robot.Pause(50);
 
-            //_robot.setDO("15", "1");   // close
-            //_robot.Pause(150);
+            _robot.setDO("15", "1");   // close
+            _robot.Pause(50);
 
             ClrBit(15);             // _robot.setDO("15", "0");
-            _robot.Pause(150);
+            _robot.Pause(50);
             SetBit(14);             // _robot.setDO("14", "1");
-            _robot.Pause(150);
+            _robot.Pause(50);
             ClrBit(14);             // _robot.setDO("14", "0");
-            _robot.Pause(300);
+            _robot.Pause(50);
             SetBit(15);             // _robot.setDO("15", "1");
-            _robot.Pause(150);
-
-            while (_robot.Busy())
-                _robot.Pause(100);
-
+            _robot.WaitMove();
+            
             // string closeSensor = _robot.SetParam("Driver", "GET $IN[12]");
             string closeSensor = _robot.SetParam("Driver", "GETDI 12");
             while (string.IsNullOrEmpty(closeSensor))
+            {
+                Thread.Sleep(100);
                 closeSensor = _robot.SetParam("Driver", "GETDI 12");
+            }
 
+            _robot.WaitMove();
             while (_robot.Busy())
                 _robot.Pause(100);
 
             // string openSensor = _robot.SetParam("Driver", "GET $IN[13]");
             string openSensor = _robot.SetParam("Driver", "GETDI 13");
             while (string.IsNullOrEmpty(openSensor))
+            {
+                Thread.Sleep(100);
                 openSensor = _robot.SetParam("Driver", "GETDI 13");
+            }
 
 
             int close = -1;
@@ -141,14 +150,12 @@ namespace KTIRobot
             {
                 _robot.Pause(500);
                 closeSensor = _robot.SetParam("Driver", "GETDI 12");
-                _robot.Pause(300);
                 Int32.TryParse(closeSensor, out close);
             }
             if (!Int32.TryParse(openSensor, out open))
             {
                 _robot.Pause(500);
                 openSensor = _robot.SetParam("Driver", "GETDI 13");
-                _robot.Pause(300);
                 Int32.TryParse(openSensor, out open);
             }
             close &= 1;
@@ -206,7 +213,7 @@ namespace KTIRobot
                     {
                         double[] tmp = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
                         for (int i = 0; i < points.Length; i++)
-                            points[1] = tmp[i];
+                            points[i] = tmp[i]; // Changed from points[1] = tmp[i]; Assuming we want to assign each of points[] to match the corresponding tmp[]
 
                         yskew = (inputArr25[1] - inputArr1[1]) / 25; //Compensation for slight skew in the axis
 
@@ -227,7 +234,7 @@ namespace KTIRobot
                     {
                         double[] tmp = { 0, 0, failArr1[2], failArr1[3], failArr1[4], failArr1[5] };
                         for (int i = 0; i < points.Length; i++)
-                            points[1] = tmp[i];
+                            points[i] = tmp[i];
 
                         yskew = (failArr25[1] - failArr1[1]) / 25; //Compensation for slight skew in the axis
 
@@ -247,7 +254,7 @@ namespace KTIRobot
                     {
                         double[] tmp = { 0, 0, passArr1[2], passArr1[3], passArr1[4], passArr1[5] };
                         for (int i = 0; i < points.Length; i++)
-                            points[1] = tmp[i];
+                            points[i] = tmp[i];
 
                         yskew = (passArr25[1] - passArr1[1]) / 25; //Compensation for slight skew in the axis
 
@@ -276,6 +283,10 @@ namespace KTIRobot
             Mat initPose = Mat.FromTxyzRxyz(initApproach);
             Mat finPose = Mat.FromTxyzRxyz(finApproach);
             Mat inputPose = Mat.FromTxyzRxyz(points);
+            //Possibly wrong translation using Txyz, try Fromxyzrpw instead
+            //Mat initPose = Mat.FromXYZRPW(initApproach);
+            //Mat finPose = Mat.FromXYZRPW(finApproach);
+            //Mat inputPose = Mat.FromXYZRPW(points);
 
             // move to pose
             _robot.MoveJ(initPose);

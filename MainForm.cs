@@ -184,7 +184,7 @@ namespace KTIRobot
                 var status = _rdk.AddFile("C:\\KTIProjects\\KTIRobot\\ShelfTableA.rdk");
                 _robot = _rdk.GetItemByName("Mitsubishi RV-8CRL", ItemType.Robot);
             }
-            _robot.SetSpeed(10000);
+            //_robot.SetSpeed(10000);
             _robot.ConnectSafe();
             if (_robot.Valid())
             {
@@ -290,6 +290,11 @@ namespace KTIRobot
         private void GripOpen_Click(object sender, EventArgs e)
         {
             GripOpenRdk();
+        }
+
+        private void PosTestBtn_Click(object sender, EventArgs e)
+        {
+            PickTray(3, 1);
         }
     }
 }
