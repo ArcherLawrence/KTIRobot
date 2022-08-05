@@ -95,47 +95,47 @@ namespace KTIRobot
             }
             //wiggle
 
-            for (int i = 0; i < 6; i++)
-            {
-                switch (i % 3)
-                {
-                    case 0:
-                        joints[0] = home0 - 10;
-                        break;
-                    case 1:
-                        joints[0] = home0;
-                        break;
-                    case 2:
-                        joints[0] = home0 + 10;
-                        break;
-                }
-                while (_robot.Busy())
-                    _robot.Pause(50);
-                try { _robot.MoveJ(joints); }
-                catch
-                {
-                    _robot.Disconnect();
-                    _robot.ConnectSafe();
-                    while (_robot.Busy())
-                        _robot.Pause(50);
-                    _robot.MoveJ(joints);
-                }
-            }
-            joints[0] = 160.0;
-            while (_robot.Busy())
-                _robot.Pause(50);
-            joints[2] = 30.0;
-            try { _robot.MoveJ(joints); }
-            catch
-            {
-                _robot.Disconnect();
-                _robot.ConnectSafe();
-                while (_robot.Busy())
-                    _robot.Pause(50);
-                _robot.MoveJ(joints);
-            }
-            while (_robot.Busy())
-                _robot.Pause(50);
+            //for (int i = 0; i < 6; i++)
+            //{
+            //    switch (i % 3)
+            //    {
+            //        case 0:
+            //            joints[0] = home0 - 10;
+            //            break;
+            //        case 1:
+            //            joints[0] = home0;
+            //            break;
+            //        case 2:
+            //            joints[0] = home0 + 10;
+            //            break;
+            //    }
+            //    while (_robot.Busy())
+            //        _robot.Pause(50);
+            //    try { _robot.MoveJ(joints); }
+            //    catch
+            //    {
+            //        _robot.Disconnect();
+            //        _robot.ConnectSafe();
+            //        while (_robot.Busy())
+            //            _robot.Pause(50);
+            //        _robot.MoveJ(joints);
+            //    }
+            //}
+            //joints[0] = 160.0;
+            //while (_robot.Busy())
+            //    _robot.Pause(50);
+            //joints[2] = 30.0;
+            //try { _robot.MoveJ(joints); }
+            //catch
+            //{
+            //    _robot.Disconnect();
+            //    _robot.ConnectSafe();
+            //    while (_robot.Busy())
+            //        _robot.Pause(50);
+            //    _robot.MoveJ(joints);
+            //}
+            //while (_robot.Busy())
+            //    _robot.Pause(50);
 
         }
         /// <summary>
@@ -294,7 +294,7 @@ namespace KTIRobot
 
         private void PosTestBtn_Click(object sender, EventArgs e)
         {
-            PickTray(3, 1);
+            PickTray(1, 1);
         }
     }
 }

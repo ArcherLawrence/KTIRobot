@@ -30,12 +30,35 @@ namespace KTIRobot
         public double[] tester2C = { 710.49, -58.00, 149.99, 179.09, 0.45, -136.88 };
         public double[] tester3A = { 716.71, -328.41, 250.00, -180.00, -0.96, -135.40 };
         public double[] tester3C = { 715.71, -455.35, 250.00, 180.00, 0.96, 44.49 };
-        public double[] inputArr1 = { 178.02, 536.38, 213.98, -179.31, -0.71, 133.68 };
+//      public double[] inputArr1 = { 178.02,  536.38,  213.98,  -179.31,  -0.71,  133.68 };         // from RT TOOLBOX
+        public double[] inputArr1 = { 175.412, 539.302, 164.018, -179.302, -0.699, 132.977 };        // from RoboDK def
         public double[] inputArr25 = { 417.98, 539.99, 214.00, -179.30, -0.71, 133.68 };
         public double[] failArr1 = { 179.00, +97.00, 217.00, -179.31, -0.71, 133.68 };
         public double[] failArr25 = { 419.00, +100.00, 217.04, -179.31, -0.71, 133.68 };
         public double[] passArr1 = { 180.04, -344.97, 216.05, -179.32, -0.71, 133.67 };
         public double[] passArr25 = { 419.99, -342.50, 214.66, -179.31, -0.71, 133.68 };
+
+        // joint position in degrees
+        // Tester 1
+        public double[] j1A = {+33.34,+56.84,+58.56,+0.63,+63.82,+170.11};
+        public double[] j1C = {+25.48,+47.83,+74.55,+1.19,+57.49,-18.03};
+
+        // Tester 2
+        public double[] j2A = {+5.10,+39.04,+89.49,+1.12,+51.05,+142.00};
+        public double[] j2C = {-5.05,+39.21,+89.21,+1.20,+51.96,-48.12};
+
+        // Fail tray
+        public double[] jFail1 = {+28.03,-18.02,+163.07,+0.85,+35.81,+74.35};
+        public double[] jFail25 = {+13.53,+12.74,+134.14,+0.47,+34.08,+60.14};
+
+        // input tray
+        public double[] jInput1 = {+71.44,+26.05,+115.41,+1.51,+38.83,+117.28};
+        public double[] jInput25 = {+52.18,+38.77,+94.86,+1.10,+46.96,+98.44};
+
+        // Pass tray
+        public double[] jPass1 = {-61.06,+7.19,+141.05,-1.56,+32.29,-13.58};
+        public double[] jPass25 = {-38.21,+23.44,+119.21,-0.93,+38.15,+9.55};
+
         public int outReg = 0;
         public void SetBit(int sigNum)
         {
@@ -190,6 +213,22 @@ namespace KTIRobot
             // open gripped
             GripOpenRdk();
 
+            Mat mPos1 = _robot.SolveFK(jInput1);
+            Mat mPos2 = Mat.transl(0.0, 0.0, 100.0) * mPos1;
+            Mat mPos3 = Mat.transl(0.0, 0.0, 200.0) * mPos1;
+            Mat mPos4 = _robot.SolveFK(jInput25);
+
+            double[] ik1 = _robot.SolveIK(mPos1);
+            double[] ik2 = _robot.SolveIK(mPos2);
+            double[] ik3 = _robot.SolveIK(mPos3);
+
+            double[] xyz1 = mPos1.Pos();
+            double[] xyz4 = mPos4.Pos();
+
+            _robot.MoveJ(ik3);
+            _robot.MoveJ(ik2);
+            _robot.MoveJ(ik1);
+
             //Full implementation of point arrays needed, using initially grabbed values for now.
             double[] points = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
 
@@ -211,6 +250,7 @@ namespace KTIRobot
             {
                 case 1:     // case input tray
                     {
+//                        double[] tmp = { 0, 0, inputArr1[2], inputArr1[5], inputArr1[4], inputArr1[3] };
                         double[] tmp = { 0, 0, inputArr1[2], inputArr1[3], inputArr1[4], inputArr1[5] };
                         for (int i = 0; i < points.Length; i++)
                             points[i] = tmp[i]; // Changed from points[1] = tmp[i]; Assuming we want to assign each of points[] to match the corresponding tmp[]
